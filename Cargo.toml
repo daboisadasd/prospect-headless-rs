@@ -1,0 +1,8 @@
+[package]
+name = "prospect-headless"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-or-later"
+description = "Experimental headless UE4 network server/proxy for The Cycle: Frontier preservation work"
+
+[dependencies]
