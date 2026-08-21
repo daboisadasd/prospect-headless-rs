@@ -1,0 +1,7 @@
+source_sha=0d9b23b654abbeefa20da75ce08023867fc70106
+workflow_run_id=32522359097
+workflow_run_attempt=1
+verified_utc=2026-08-21T20:12:48Z
+rust_targets=ubuntu-latest,windows-latest
+windows_artifact=prospect-headless-windows-x64
+join_oracle=passed
