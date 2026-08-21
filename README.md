@@ -35,6 +35,18 @@ cargo build --release
 
 No third-party crates are required. Windows entropy uses `BCryptGenRandom`; Unix uses `/dev/urandom`. Run `BUILD_WINDOWS.ps1` to execute the protocol regression tests before producing the release executable.
 
+### Continuous build verification
+
+Every push to `master` runs `.github/workflows/build.yml` on GitHub Actions. The gate currently:
+
+- runs `cargo check --all-targets` on Windows and Linux,
+- runs all Rust tests on Windows and Linux,
+- builds the release server on Windows and Linux,
+- compiles and runs the independent C++ `NMT_Join` oracle,
+- uploads `prospect-headless.exe` as the `prospect-headless-windows-x64` workflow artifact.
+
+A revision should not be treated as build-verified until this workflow is green.
+
 ## Best first test: proxy the known-good listen host
 
 Keep the existing `?listen` game host on its normal port, then run this proxy on a different port:
