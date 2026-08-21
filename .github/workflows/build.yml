@@ -63,3 +63,44 @@ jobs:
 
       - name: Run oracle
         run: ./join_oracle
+
+  record-green-build:
+    name: Record verified build
+    needs:
+      - rust
+      - join-oracle
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Write build attestation
+        shell: bash
+        run: |
+          mkdir -p ci
+          {
+            echo "source_sha=${{ github.sha }}"
+            echo "workflow_run_id=${{ github.run_id }}"
+            echo "workflow_run_attempt=${{ github.run_attempt }}"
+            echo "verified_utc=$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            echo "rust_targets=ubuntu-latest,windows-latest"
+            echo "windows_artifact=prospect-headless-windows-x64"
+            echo "join_oracle=passed"
+          } > ci/LAST_GREEN.txt
+
+      - name: Commit build attestation
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- ci/LAST_GREEN.txt
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "ci: record verified build ${{ github.sha }} [skip ci]"
+          git push origin HEAD:master
