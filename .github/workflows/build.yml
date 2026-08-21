@@ -1,0 +1,65 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rust:
+    name: Rust (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Toolchain versions
+        run: |
+          rustc --version
+          cargo --version
+
+      - name: Check all targets
+        run: cargo check --all-targets
+
+      - name: Run Rust tests
+        run: cargo test --all-targets
+
+      - name: Build release server
+        run: cargo build --release
+
+      - name: Upload Windows release executable
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: prospect-headless-windows-x64
+          path: target/release/prospect-headless.exe
+          if-no-files-found: error
+          retention-days: 14
+
+  join-oracle:
+    name: NMT_Join C++ oracle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compile oracle
+        run: g++ -std=c++20 -O2 -Wall -Wextra -Werror tests/join_oracle.cpp -o join_oracle
+
+      - name: Run oracle
+        run: ./join_oracle
